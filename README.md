@@ -66,6 +66,10 @@ Open **Options > AddOns > SimpleHideHUD**, or type `/shh`, and tick what you wan
 - **Something stayed hidden after unticking it.** Type `/reload`. If it still happens, please [open an issue](https://github.com/AndrewGBest/SimpleHideHUD/issues) with your game version and the element name.
 - **The UI is hidden and Escape does nothing.** You are probably in combat, where addons cannot show the UI. Try Alt+Z, or wait until combat ends and press Escape again.
 
+## License
+
+SimpleHideHUD is free software, licensed under the [GNU General Public License v3.0](LICENSE). It comes with no warranty.
+
 ## More
 
 - [Changelog](CHANGELOG.md)

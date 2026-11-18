@@ -6,10 +6,11 @@
 | --- | --- |
 | `SimpleHideHUD.toc` | Addon manifest. One file covers every client through a comma-separated `## Interface` list |
 | `SimpleHideHUD.lua` | All addon code |
+| `LICENSE` | GNU General Public License v3.0 |
 | `CHANGELOG.md` | User-facing changes per version |
 | `docs/` | Element reference and these notes |
 
-Only the `.toc` and `.lua` files ship to players. Everything else is marked `export-ignore` in `.gitattributes`, so `git archive` leaves it out of the release zip.
+The `.toc`, `.lua` and `LICENSE` files ship to players. Everything else is marked `export-ignore` in `.gitattributes`, so `git archive` leaves it out of the release zip.
 
 ## How hiding works
 
@@ -71,4 +72,4 @@ git archive --format=zip --prefix=SimpleHideHUD/ -o SimpleHideHUD-v2.0.0.zip v2.
 gh release create v2.0.0 SimpleHideHUD-v2.0.0.zip --verify-tag --title "SimpleHideHUD v2.0.0" --notes-file notes.md
 ```
 
-The zip must contain a single `SimpleHideHUD/` folder with the `.toc` and `.lua` inside it.
+The zip must contain a single `SimpleHideHUD/` folder with the `.toc`, `.lua` and `LICENSE` inside it.
