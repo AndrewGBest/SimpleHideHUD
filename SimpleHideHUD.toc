@@ -4,6 +4,7 @@
 ## Notes: Hide the parts of the default UI that Blizzard gives you no option to hide.
 ## Author: PlayState
 ## Category: User Interface
+## X-License: GPL-3.0-or-later
 ## SavedVariablesPerCharacter: SimpleHideHUDDB, hsbhide, hchide
 
 SimpleHideHUD.lua

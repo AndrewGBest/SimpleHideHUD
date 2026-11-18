@@ -68,7 +68,9 @@ Open **Options > AddOns > SimpleHideHUD**, or type `/shh`, and tick what you wan
 
 ## License
 
-SimpleHideHUD is free software, licensed under the [GNU General Public License v3.0](LICENSE). It comes with no warranty.
+Copyright (C) 2025-2026 Andrew Best (PlayState).
+
+SimpleHideHUD is free software: you can redistribute it and modify it under the terms of the [GNU General Public License](LICENSE), version 3 or (at your option) any later version. It comes with no warranty.
 
 ## More
 

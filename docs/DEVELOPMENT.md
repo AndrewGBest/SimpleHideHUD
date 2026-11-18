@@ -6,7 +6,7 @@
 | --- | --- |
 | `SimpleHideHUD.toc` | Addon manifest. One file covers every client through a comma-separated `## Interface` list |
 | `SimpleHideHUD.lua` | All addon code |
-| `LICENSE` | GNU General Public License v3.0 |
+| `LICENSE` | GNU General Public License, version 3 or later |
 | `CHANGELOG.md` | User-facing changes per version |
 | `docs/` | Element reference and these notes |
 
