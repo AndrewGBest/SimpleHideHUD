@@ -39,6 +39,7 @@ Open **Options > AddOns > SimpleHideHUD**, or type `/shh`, and tick what you wan
 ## Good to know
 
 - Hidden elements reappear while Edit Mode is open so you can still move them.
+- Hidden chat reappears while you are typing a message, then hides again.
 - The game does not let addons show or hide protected frames (such as the player frame) during combat. Those changes are applied when combat ends. For the whole UI, Alt+Z works in combat.
 - Hiding the red error text also hides quest progress messages, because they share the same area.
 

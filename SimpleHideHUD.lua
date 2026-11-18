@@ -28,7 +28,7 @@ local SECTIONS = {
             {
                 key = "chat",
                 label = "Chat windows",
-                tip = "Hides every chat window and its tab.",
+                tip = "Hides every chat window and its tab. Chat comes back while you are typing a message.",
                 frames = { "ChatFrame%d", "ChatFrame%dTab" },
             },
             {
@@ -75,8 +75,7 @@ local SECTIONS = {
                 tip = "Hides the experience, reputation and other tracking bars.",
                 frames = {
                     "StatusTrackingBarManager", "MainStatusTrackingBarContainer",
-                    "SecondaryStatusTrackingBarContainer", "MainMenuExpBar",
-                    "ReputationWatchBar", "MainMenuBarMaxLevelBar",
+                    "SecondaryStatusTrackingBarContainer", "MainMenuBarMaxLevelBar",
                 },
             },
             {
@@ -102,7 +101,7 @@ local SECTIONS = {
                 tip = "Hides the zone name bar above the minimap.",
                 frames = {
                     "MinimapCluster.BorderTop", "MinimapCluster.ZoneTextButton",
-                    "MinimapBorderTop", "MinimapZoneTextButton", "MinimapToggleButton",
+                    "MinimapZoneTextButton", "MinimapToggleButton",
                 },
             },
             {
@@ -121,7 +120,7 @@ local SECTIONS = {
                 key = "minimapTracking",
                 label = "Tracking button",
                 tip = "Hides the tracking button on the minimap.",
-                frames = { "MinimapCluster.Tracking", "MiniMapTracking", "MiniMapTrackingFrame" },
+                frames = { "MinimapCluster.Tracking", "MiniMapTracking" },
             },
             {
                 key = "minimapWorldMap",
@@ -133,7 +132,7 @@ local SECTIONS = {
                 key = "minimapExpansion",
                 label = "Expansion button",
                 tip = "Hides the expansion landing page button on the minimap.",
-                frames = { "ExpansionLandingPageMinimapButton", "GarrisonLandingPageMinimapButton" },
+                frames = { "ExpansionLandingPageMinimapButton" },
             },
             {
                 key = "minimapAddons",
@@ -282,14 +281,14 @@ end
 local tracked = {}      -- frame -> { keys = {}, transient = bool, wasShown = bool }
 local pending = {}      -- frames waiting for combat to end
 local suspended = false -- true while Edit Mode is open, so frames can be moved
-local changing = false  -- true while this addon itself is calling Hide/Show
+local paused = {}       -- element key -> true while that one element is shown temporarily
 
 local function WantsHidden(info)
     if suspended then
         return false
     end
     for key in pairs(info.keys) do
-        if IsHidden(key) then
+        if IsHidden(key) and not paused[key] then
             return true
         end
     end
@@ -313,16 +312,16 @@ local function Sync(frame)
     if WantsHidden(info) then
         if frame:IsShown() then
             info.wasShown = true
-            changing = true
+            info.changing = true
             frame:Hide()
-            changing = false
+            info.changing = false
         end
     elseif info.wasShown then
         info.wasShown = false
         if not info.transient then
-            changing = true
+            info.changing = true
             frame:Show()
-            changing = false
+            info.changing = false
         end
     end
 end
@@ -330,22 +329,23 @@ end
 local function Track(frame, element)
     local info = tracked[frame]
     if not info then
-        info = { keys = {}, wasShown = false }
+        -- changing: true while this addon itself is calling Hide/Show on the frame
+        info = { keys = {}, wasShown = false, changing = false }
         tracked[frame] = info
         hooksecurefunc(frame, "Show", function(self)
-            if not changing then
+            if not info.changing then
                 Sync(self)
             end
         end)
         hooksecurefunc(frame, "Hide", function()
             -- The game hid it by itself, so there is nothing to bring back later.
-            if not changing then
+            if not info.changing then
                 info.wasShown = false
             end
         end)
         if frame.SetShown then
             hooksecurefunc(frame, "SetShown", function(self, shown)
-                if changing then
+                if info.changing then
                     return
                 end
                 if shown then
@@ -405,15 +405,25 @@ end
 local RESTORE_BUTTON = "SimpleHideHUDRestoreButton"
 local restoreButton = CreateFrame("Button", RESTORE_BUTTON)
 local uiHidden = false
+local escapeStale = false -- Escape override still set, waiting for combat to end
+
+local function ReleaseEscape()
+    if InCombatLockdown() then
+        escapeStale = true
+    else
+        escapeStale = false
+        ClearOverrideBindings(restoreButton)
+    end
+end
 
 local function ShowUI()
-    if InCombatLockdown() then
+    if IsLocked(UIParent) then
         Print("The UI cannot be shown by an addon during combat. Press Alt+Z.")
         return
     end
-    ClearOverrideBindings(restoreButton)
     uiHidden = false
     UIParent:Show()
+    ReleaseEscape()
 end
 
 local function HideUI()
@@ -430,9 +440,9 @@ restoreButton:SetScript("OnClick", ShowUI)
 
 -- If the UI comes back some other way (Alt+Z), give Escape back.
 UIParent:HookScript("OnShow", function()
-    if uiHidden and not InCombatLockdown() then
+    if uiHidden then
         uiHidden = false
-        ClearOverrideBindings(restoreButton)
+        ReleaseEscape()
     end
 end)
 
@@ -539,23 +549,16 @@ end
 panel:SetScript("OnShow", RefreshPanel)
 
 local function RegisterPanel()
-    if Settings and Settings.RegisterCanvasLayoutCategory then
-        local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name)
-        Settings.RegisterAddOnCategory(category)
-        categoryID = category.GetID and category:GetID() or category.ID
-    elseif InterfaceOptions_AddCategory then
-        InterfaceOptions_AddCategory(panel)
-    end
+    local category = Settings.RegisterCanvasLayoutCategory(panel, panel.name)
+    Settings.RegisterAddOnCategory(category)
+    categoryID = category:GetID()
 end
 
 local function OpenOptions()
     if InCombatLockdown() then
         Print("The options panel cannot be opened during combat.")
-    elseif categoryID and Settings and Settings.OpenToCategory then
+    elseif categoryID then
         Settings.OpenToCategory(categoryID)
-    elseif InterfaceOptionsFrame_OpenToCategory then
-        InterfaceOptionsFrame_OpenToCategory(panel)
-        InterfaceOptionsFrame_OpenToCategory(panel)
     end
 end
 
@@ -613,10 +616,43 @@ end
 ------------------------------------------------------------------------------
 -- Events
 ------------------------------------------------------------------------------
-local function SetSuspended(value)
-    suspended = value
+local function SyncAll()
     for frame in pairs(tracked) do
         Sync(frame)
+    end
+end
+
+local function SetSuspended(value)
+    suspended = value
+    SyncAll()
+end
+
+-- The chat edit box lives inside the chat window, so a hidden chat window would
+-- leave you typing blind. Bring chat back while a message is being typed.
+local function SetTyping(value)
+    if paused.chat ~= value then
+        paused.chat = value
+        if IsHidden("chat") then
+            SyncAll()
+        end
+    end
+end
+
+local function HookChatTyping()
+    local function OnActivate()
+        SetTyping(true)
+    end
+    local function OnDeactivate()
+        SetTyping(nil)
+    end
+    if ChatFrameUtil and ChatFrameUtil.ActivateChat and ChatFrameUtil.DeactivateChat then
+        hooksecurefunc(ChatFrameUtil, "ActivateChat", OnActivate)
+        hooksecurefunc(ChatFrameUtil, "DeactivateChat", OnDeactivate)
+    end
+    -- Older call sites still go through these global aliases.
+    if ChatEdit_ActivateChat and ChatEdit_DeactivateChat then
+        hooksecurefunc("ChatEdit_ActivateChat", OnActivate)
+        hooksecurefunc("ChatEdit_DeactivateChat", OnDeactivate)
     end
 end
 
@@ -644,12 +680,16 @@ events:SetScript("OnEvent", function(_, event, arg1)
                 SetSuspended(false)
             end)
         end
+        HookChatTyping()
         ApplyAll()
     elseif event == "PLAYER_ENTERING_WORLD" then
         ApplyAll()
     elseif event == "PLAYER_REGEN_ENABLED" then
         for frame in pairs(pending) do
             Sync(frame)
+        end
+        if escapeStale then
+            ReleaseEscape()
         end
     end
 end)

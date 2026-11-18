@@ -6,6 +6,7 @@
 - New things you can hide: chat buttons, micro menu, bag bar, XP and reputation bars, action bar gryphons, the whole minimap or its zone name bar, zoom buttons, calendar, tracking, world map, expansion and addon drawer buttons, player frame, quest tracker, raid manager tab, red error text, zone name popup, level-up banners and the boss kill banner. Only the ones that exist on your client are offered.
 - New options panel with a tick box per element, and slash commands: `/shh`, `/shh ui`, `/shh list`, `/shh <name>`.
 - Hidden elements come back while Edit Mode is open so they can still be moved.
+- Hidden chat comes back while you are typing a message, then hides again.
 - Changes to combat-protected frames wait until combat ends instead of raising a "blocked action" error.
 - "Hide all UI" no longer rewrites your Escape key binding; it uses a temporary override that is removed when the UI returns.
 - Hiding no longer replaces the game's own `Show` functions.
