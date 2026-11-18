@@ -1,8 +1,9 @@
-## Interface: 100207
-## Version: 1.0.2
+## Interface: 120105, 120107, 50504, 38002, 20506, 11509, 16001
+## Version: 2.0.0
 ## Title: SimpleHideHUD
-## Notes: SimpleHideHUD
+## Notes: Hide the parts of the default UI that Blizzard gives you no option to hide.
 ## Author: PlayState
-##SavedVariablesPerCharacter: hsbhide, hchide
+## Category: User Interface
+## SavedVariablesPerCharacter: SimpleHideHUDDB, hsbhide, hchide
 
 SimpleHideHUD.lua
