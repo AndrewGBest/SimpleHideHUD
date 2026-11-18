@@ -1,0 +1,8 @@
+* text=auto eol=lf
+
+# Keep the release zip (git archive) down to the addon itself.
+.gitattributes export-ignore
+.gitignore     export-ignore
+README.md      export-ignore
+CHANGELOG.md   export-ignore
+docs           export-ignore
