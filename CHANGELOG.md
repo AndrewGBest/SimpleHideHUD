@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.1 (2026-11-18)
+
+- SimpleHideHUD is now licensed under the GNU General Public License, version 3 or later. The license text ships in the download.
+- No changes to how the addon behaves.
+
 ## 2.0.0 (2026-11-18)
 
 - Works on every current client from one download: Retail (12.1.5, and 12.1.7 on the PTR), WoW: Forever (1.60.1), Classic Era / Season of Discovery / Hardcore (1.15.9), TBC Classic Anniversary (2.5.6), Mists of Pandaria Classic (5.5.4) and Titan Reforged (3.80.2).
